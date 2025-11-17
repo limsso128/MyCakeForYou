@@ -3,30 +3,66 @@ import javax.swing.JPanel;
 import javax.swing.ImageIcon;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.MouseAdapter; // <-- 클릭용 import
+import java.awt.event.MouseEvent;  // <-- 클릭용 import
 
 // 하나의 파일로 모든 것을 해결하는 Main 클래스
 public class main {
 
     // 1. 이미지를 배경으로 그리는 특수 패널(Panel)
-    // (Main 클래스 안에 작은 클래스를 하나 더 만듦)
     static class ImagePanel extends JPanel {
 
-        private Image backgroundImage;
+        private Image startImage;  // 'background_start.jpg'
+        private Image breadImage;  // 'Bread_Basic.png'
+
+        private String currentState; // 현재 상태 (start / bread)
 
         public ImagePanel() {
-            try {
-                // Main.java와 같은 폴더에 있는 "background_start.jpg"를 불러옵니다.
-                ImageIcon icon = new ImageIcon("background_start.jpg");
-                backgroundImage = icon.getImage();
+            // 1. 이미지 불러오기
+            loadImages();
 
-                // ImageIcon은 파일이 없어도 에러가 안 나서,
-                // 이미지가 잘 로드되었는지 확인하는 작업이 필요합니다.
-                if (backgroundImage == null || icon.getIconWidth() == -1) {
+            // 2. 현재 상태를 'start'로 설정
+            currentState = "start";
+
+            // 3. ⭐ 마우스 클릭 이벤트 추가
+            this.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // 'start' 상태일 때 (시작 화면일 때) 클릭하면
+                    if (currentState.equals("start")) {
+
+                        // 상태를 'bread'로 변경
+                        currentState = "bread";
+
+                        // 패널을 다시 그리도록 요청 (paintComponent가 호출됨)
+                        repaint();
+                    }
+                }
+            });
+        }
+
+        // 이미지 로딩 전용 메서드
+        private void loadImages() {
+            try {
+                // Main.java와 같은 폴더에 있는 파일들을 불러옵니다.
+                ImageIcon startIcon = new ImageIcon("background_start.jpg");
+                ImageIcon breadIcon = new ImageIcon("Bread_Basic.png");
+
+                startImage = startIcon.getImage();
+                breadImage = breadIcon.getImage();
+
+                // 시작 이미지 로딩 확인
+                if (startImage == null || startIcon.getIconWidth() == -1) {
                     System.err.println("---!!! 오류 !!!---");
                     System.err.println(" background_start.jpg 이미지를 찾을 수 없습니다.");
-                    System.err.println(" Main.java와 같은 폴더에 파일이 있는지 확인하세요!");
-                    System.err.println("-------------------");
-                    backgroundImage = null; // 실패 시 확실히 null로
+                    startImage = null;
+                }
+
+                // 빵 이미지 로딩 확인
+                if (breadImage == null || breadIcon.getIconWidth() == -1) {
+                    System.err.println("---!!! 오류 !!!---");
+                    System.err.println(" Bread_Basic.png 이미지를 찾을 수 없습니다.");
+                    breadImage = null;
                 }
 
             } catch (Exception e) {
@@ -34,16 +70,23 @@ public class main {
             }
         }
 
-        // 2. 패널에 그림을 그리는 메서드
+        // 2. 패널에 그림을 그리는 메서드 (수정됨)
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (backgroundImage != null) {
-                // 이미지를 패널 크기(getWidth(), getHeight())에 꽉 차게 그립니다.
-                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+
+            // ⭐ 현재 상태에 따라 다른 이미지를 그림
+            if (currentState.equals("start") && startImage != null) {
+                // "start" 상태면 시작 배경을 그림
+                g.drawImage(startImage, 0, 0, getWidth(), getHeight(), this);
+
+            } else if (currentState.equals("bread") && breadImage != null) {
+                // "bread" 상태면 빵 이미지를 그림
+                g.drawImage(breadImage, 0, 0, getWidth(), getHeight(), this);
+
             } else {
                 // 이미지 로딩 실패 시 글자 표시
-                g.drawString("이미지 로딩 실패. Main.java와 같은 폴더에 background_start.jpg가 있는지 확인하세요.", 20, 20);
+                g.drawString("이미지 로딩 실패. 파일이 Main.java와 같은 폴더에 있는지 확인하세요.", 20, 20);
             }
         }
     }
