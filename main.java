@@ -14,24 +14,23 @@ public class main {
     static class ImagePanel extends JPanel {
 
         // --- 1. 변수 선언 ---
-
-        // ⭐↓↓↓ 여기서 크기 조절! (숫자를 바꾸세요) ↓↓↓⭐
         private static final int CREAM_WIDTH = 50;  // 생크림 조각 가로 크기
         private static final int CREAM_HEIGHT = 50; // 생크림 조각 세로 크기
-        // ⭐↑↑↑ 여기서 크기 조절! ↑↑↑⭐
 
         // (배경 이미지)
         private Image startImage;
         private Image breadBasicImage, breadChocoImage, breadStrawberryImage;
         private Image breadBasicCreamImage, breadChocoCreamImage, breadStrawberryCreamImage;
         private Image letterSelectionImage; // (4단계)
-        private Image[] letterImages = new Image[9]; // (5단계: letter1~9)
+        private Image letterWriteImage;     // (6단계 배경)
+        private Image[] letterImages = new Image[9]; // (letter1~9 편지지)
 
         // (크림 '조각' 이미지)
         private Image creamChocoImg, creamStrawImg, creamWhiteImg;
 
         private String currentState;
         private String selectedTool = "none";
+        private int selectedLetterNumber = 0; // (선택된 편지 번호 저장, 1~9)
 
         private ArrayList<Placement> decorations = new ArrayList<>();
 
@@ -46,7 +45,7 @@ public class main {
 
         // (생성자)
         public ImagePanel() {
-            loadImages();
+            loadImages(); // 여기서 이미지 로드
             currentState = "start";
 
             // (마우스 클릭 리스너)
@@ -66,25 +65,21 @@ public class main {
 
                         // "초코" 버튼
                         if (isClickInArea(x, y, 121, 271, 26, 126)) {
-                            System.out.println("빵 선택: 초코");
                             currentState = "bread_choco";
                             repaint();
                         }
                         // "딸기" 버튼
                         else if (isClickInArea(x, y, 312, 462, 26, 126)) {
-                            System.out.println("빵 선택: 딸기");
                             currentState = "bread_strawberry";
                             repaint();
                         }
                         // "기본" 버튼
                         else if (isClickInArea(x, y, 489, 639, 18, 118)) {
-                            System.out.println("빵 선택: 기본");
                             currentState = "bread_basic";
                             repaint();
                         }
                         // "다음" 버튼 (빵 -> 크림)
                         else if (isClickInArea(x, y, 601, 751, 441, 541)) {
-                            System.out.println("--- '다음' 버튼 클릭 (빵 -> 크림) ---");
                             if (currentState.equals("bread_basic")) currentState = "cream_basic";
                             else if (currentState.equals("bread_choco")) currentState = "cream_choco";
                             else if (currentState.equals("bread_strawberry")) currentState = "cream_strawberry";
@@ -92,16 +87,12 @@ public class main {
                             selectedTool = "none";
                             repaint();
                         }
-                        else {
-                            System.out.println("빵 화면 클릭 (버튼 밖): x=" + x + ", y=" + y);
-                        }
 
                         // [ 3단계: 크림 선택/배치 ]
                     } else if (currentState.startsWith("cream_")) {
 
-                        // "다음" 버튼 (크림 -> 편지)
+                        // "다음" 버튼 (크림 -> 편지 선택)
                         if (isClickInArea(x, y, 601, 751, 441, 541)) {
-                            System.out.println("--- '다음' 버튼 클릭 (크림 -> 편지) ---");
                             currentState = "letter_selection";
                             decorations.clear(); // 크림 장식 지우기
                             selectedTool = "none";
@@ -109,17 +100,14 @@ public class main {
                         }
                         // "초코크림" 선택
                         else if (isClickInArea(x, y, 119, 269, 39, 139)) {
-                            System.out.println("도구 선택: 초코 크림");
                             selectedTool = "cream_choco";
                         }
                         // "딸기크림" 선택
                         else if (isClickInArea(x, y, 314, 464, 42, 142)) {
-                            System.out.println("도구 선택: 딸기 크림");
                             selectedTool = "cream_straw";
                         }
                         // "하얀크림" 선택
                         else if (isClickInArea(x, y, 496, 646, 38, 138)) {
-                            System.out.println("도구 선택: 하얀 크림");
                             selectedTool = "cream_white";
                         }
                         // 케이크 영역 클릭 시 (크림 배치)
@@ -130,79 +118,75 @@ public class main {
                             else if (selectedTool.equals("cream_white")) imageToPlace = creamWhiteImg;
 
                             if (imageToPlace != null) {
-                                // 크기 조절된 이미지의 크기를 가져옴
                                 int imgWidth = imageToPlace.getWidth(null);
                                 int imgHeight = imageToPlace.getHeight(null);
                                 int placeX = x - (imgWidth / 2);
                                 int placeY = y - (imgHeight / 2);
-
                                 decorations.add(new Placement(placeX, placeY, imageToPlace));
                                 repaint();
                             }
                         }
 
-                        // [ 4단계: 편지 선택 ]
+                        // [ 4단계: 편지 선택 ] -> 클릭하면 6단계(letter_write)로 넘어감
                     } else if (currentState.equals("letter_selection")) {
-
-                        // "다음" 버튼 (여기서는 우선 비활성화. 필요하면 좌표 넣고 기능 추가)
-                        // if (isClickInArea(x, y, 601, 751, 441, 541)) { ... }
-
-                        // --- ⭐ 여기에 편지 1~9번 클릭 좌표를 넣으세요 (지금은 0,0,0,0 입니다) ---
-                        if (isClickInArea(x, y, 0, 0, 0, 0)) { // 1번 편지 (좌표 수정 필요)
-                            currentState = "letter1";
+                        // "다음" 버튼
+                        if (isClickInArea(x, y, 601, 751, 441, 541)) {
+                            currentState = "start"; // 임시로 처음으로
+                            selectedLetterNumber = 0;
                             repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 2번 편지 (좌표 수정 필요)
-                            currentState = "letter2";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 3번 편지 (좌표 수정 필요)
-                            currentState = "letter3";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 4번 편지 (좌표 수정 필요)
-                            currentState = "letter4";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 5번 편지 (좌표 수정 필요)
-                            currentState = "letter5";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 6번 편지 (좌표 수정 필요)
-                            currentState = "letter6";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 7번 편지 (좌표 수정 필요)
-                            currentState = "letter7";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 8번 편지 (좌표 수정 필요)
-                            currentState = "letter8";
-                            repaint();
-                        } else if (isClickInArea(x, y, 0, 0, 0, 0)) { // 9번 편지 (좌표 수정 필요)
-                            currentState = "letter9";
-                            repaint();
-                        } else {
-                            System.out.println("편지 선택 화면 클릭 (버튼 밖): x=" + x + ", y=" + y);
+                            return;
                         }
 
-                        // [ 5단계: 개별 편지 확인 ]
-                    } else if (currentState.startsWith("letter")) {
+                        // --- ⭐ 9개 편지지 좌표 적용 (주위 +/- 50픽셀) ---
+                        int clickedLetter = 0; // 0은 클릭 안 함
 
-                        // "다음" 버튼 (편지 -> 다음 단계? 또는 처음?)
+                        // (192, 110) 주변
+                        if (isClickInArea(x, y, 142, 242, 60, 160)) { clickedLetter = 1; }
+                        // (386, 110) 주변
+                        else if (isClickInArea(x, y, 336, 436, 60, 160)) { clickedLetter = 2; }
+                        // (588, 111) 주변
+                        else if (isClickInArea(x, y, 538, 638, 61, 161)) { clickedLetter = 3; }
+                        // (191, 253) 주변
+                        else if (isClickInArea(x, y, 141, 241, 203, 303)) { clickedLetter = 4; }
+                        // (387, 256) 주변
+                        else if (isClickInArea(x, y, 337, 437, 206, 306)) { clickedLetter = 5; }
+                        // (586, 262) 주변
+                        else if (isClickInArea(x, y, 536, 636, 212, 312)) { clickedLetter = 6; }
+                        // (191, 403) 주변
+                        else if (isClickInArea(x, y, 141, 241, 353, 453)) { clickedLetter = 7; }
+                        // (390, 403) 주변
+                        else if (isClickInArea(x, y, 340, 440, 353, 453)) { clickedLetter = 8; }
+                        // (590, 400) 주변
+                        else if (isClickInArea(x, y, 540, 640, 350, 450)) { clickedLetter = 9; }
+
+                        // 편지 중 하나가 클릭되었다면
+                        if (clickedLetter != 0) {
+                            selectedLetterNumber = clickedLetter; // 선택된 편지 번호 저장 (1~9)
+                            currentState = "letter_write";       // 6단계(편지 작성) 상태로 전환
+                            System.out.println("편지 " + selectedLetterNumber + " 선택. 편지 작성 화면으로 이동.");
+                            repaint();
+                        }
+
+                        // [ 6단계: 편지 작성 (letter_write) ]
+                    } else if (currentState.equals("letter_write")) {
+
+                        // "다음" 버튼
                         if (isClickInArea(x, y, 601, 751, 441, 541)) {
-                            System.out.println("--- '다음' 버튼 클릭 (편지 -> ???) ---");
-                            // TODO: 이 다음 단계로 넘어가거나, 처음으로 돌아갑니다.
-                            currentState = "start"; // (임시로 처음으로)
-                            decorations.clear();
-                            selectedTool = "none";
+                            currentState = "start"; // 임시로 처음으로
+                            selectedLetterNumber = 0; // 선택된 편지 초기화
                             repaint();
                         }
                     }
-
                 }
             });
         }
 
-        // (클릭 영역 확인)
+        // (클릭 영역 확인 - 동일)
         private boolean isClickInArea(int x, int y, int x1, int x2, int y1, int y2) {
             return (x >= x1 && x <= x2) && (y >= y1 && y <= y2);
         }
 
-        // --- 4. 이미지 로딩 ---
+        // --- 4. 이미지 로딩 (⭐ 수정됨) ---
         private void loadImages() {
             try {
                 // (배경 이미지들은 원본 크기로 로드)
@@ -216,6 +200,9 @@ public class main {
 
                 // (4단계: 편지 선택 이미지 로드)
                 letterSelectionImage = loadImage("letter_selection.png");
+
+                // (6단계 배경 이미지 로드)
+                letterWriteImage = loadImage("letter_write.png");
 
                 // (5단계: 개별 편지 1~9 로드)
                 for (int i = 0; i < 9; i++) {
@@ -232,19 +219,42 @@ public class main {
             }
         }
 
-        // (원본 크기 로더)
+        // (원본 크기 로더 - ⭐ 'getResource' 방식으로 수정됨)
+        /**
+         * 이미지를 .class 파일 기준(리소스)으로 불러옵니다.
+         * (new ImageIcon(fileName)보다 훨씬 안정적입니다)
+         */
         private Image loadImage(String fileName) {
-            ImageIcon icon = new ImageIcon(fileName);
-            if (icon.getIconWidth() == -1) {
-                System.err.println("오류: " + fileName + " 파일을 찾을 수 없습니다.");
+            try {
+                // getClass().getResource()는 .class 파일 기준으로 리소스를 찾습니다.
+                java.net.URL imgURL = getClass().getResource(fileName);
+
+                if (imgURL == null) {
+                    System.err.println("오류: " + fileName + " 파일을 찾을 수 없습니다. (리소스로딩 실패)");
+                    System.err.println("팁: .class 파일과 .png 파일이 같은 폴더에 있는지 확인하세요.");
+                    return null;
+                }
+
+                ImageIcon icon = new ImageIcon(imgURL);
+
+                // 로딩이 실패했는지 한 번 더 확인 (getIconWidth() == -1)
+                if (icon.getIconWidth() == -1) {
+                    System.err.println("오류: " + fileName + "을 찾았지만, 이미지로 불러올 수 없습니다.");
+                    return null;
+                }
+
+                return icon.getImage();
+
+            } catch (Exception e) {
+                System.err.println("오류: " + fileName + " 로딩 중 예외 발생: " + e.getMessage());
+                e.printStackTrace();
                 return null;
             }
-            return icon.getImage();
         }
 
-        // (크기 조절 로더)
+        // (크기 조절 로더 - 동일)
         private Image loadImage(String fileName, int width, int height) {
-            Image originalImage = loadImage(fileName); // 1. 원본 로드
+            Image originalImage = loadImage(fileName); // 1. 원본 로드 (수정된 리소스 로더 호출)
             if (originalImage != null) {
                 // 2. 크기 조절
                 Image scaledImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -256,7 +266,7 @@ public class main {
             return null;
         }
 
-        // --- 5. 화면 그리기 ---
+        // --- 5. 화면 그리기 (⭐ 디버깅 코드 포함) ---
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -271,33 +281,19 @@ public class main {
             else if (currentState.equals("cream_basic")) backgroundToDraw = breadBasicCreamImage;
             else if (currentState.equals("cream_choco")) backgroundToDraw = breadChocoCreamImage;
             else if (currentState.equals("cream_strawberry")) backgroundToDraw = breadStrawberryCreamImage;
-
                 // (4단계: 편지 선택 그리기)
             else if (currentState.equals("letter_selection")) {
                 backgroundToDraw = letterSelectionImage;
             }
-            // (5단계: 개별 편지 그리기)
-            else if (currentState.startsWith("letter")) {
-                try {
-                    // "letter" 다음의 숫자를 추출 (e.g., "letter1" -> 1)
-                    String numberStr = currentState.substring("letter".length());
-                    int index = Integer.parseInt(numberStr) - 1; // 1~9 -> 0~8 (배열 인덱스)
-
-                    if (index >= 0 && index < 9 && letterImages[index] != null) {
-                        backgroundToDraw = letterImages[index];
-                    } else {
-                        g.drawString(currentState + " 이미지 로딩 실패.", 20, 20);
-                    }
-                } catch (Exception e) {
-                    g.drawString("잘못된 letter 상태: " + currentState, 20, 40);
-                }
+            // (6단계 편지 작성 화면 그리기)
+            else if (currentState.equals("letter_write")) {
+                backgroundToDraw = letterWriteImage;
             }
 
             // (선택된 배경 그리기)
             if (backgroundToDraw != null) {
                 g.drawImage(backgroundToDraw, 0, 0, getWidth(), getHeight(), this);
             } else {
-                // 5단계에서 letterImages[index]가 null일 경우 이 메시지가 뜸
                 g.drawString(currentState + " 이미지 로딩 실패.", 20, 20);
             }
 
@@ -307,12 +303,51 @@ public class main {
                     g.drawImage(p.image, p.x, p.y, this);
                 }
             }
+
+            // (letter_write 상태일 때 선택된 편지지를 겹쳐 그리기)
+            // ... (위쪽 코드는 그대로) ...
+
+            // (letter_write 상태일 때 선택된 편지지를 겹쳐 그리기)
+            if (currentState.equals("letter_write") && selectedLetterNumber != 0) {
+                // selectedLetterNumber는 1~9, 배열 인덱스는 0~8
+                Image selectedLetterImage = letterImages[selectedLetterNumber - 1];
+
+                if (selectedLetterImage != null) {
+
+                    // --- ⭐ [수정된 부분 시작] ---
+
+                    // 1. 원하는 크기 설정 (화면에 적당히 들어오도록 400~500 정도로 줄임)
+                    // 편지지가 세로로 길다면 width=400, height=500 추천
+                    // 편지지가 가로로 길다면 width=500, height=400 추천
+                    int targetWidth = 405;
+                    int targetHeight = 304;
+
+                    // 2. 화면 중앙 좌표 계산 (줄어든 크기 기준)
+                    int letterX = (getWidth() - targetWidth) / 2;   // 가로 중앙
+                    int letterY = (getHeight() - targetHeight) / 2; // 세로 중앙
+
+                    // 3. 지정한 크기(targetWidth, targetHeight)로 그리기
+                    // g.drawImage(이미지, x, y, 가로크기, 세로크기, this);
+                    g.drawImage(selectedLetterImage, letterX, letterY, targetWidth, targetHeight, this);
+
+                    // --- ⭐ [수정된 부분 끝] ---
+
+                } else {
+                    // (실패!) 이미지가 null입니다.
+                    String errorMsg = "오류: letter" + selectedLetterNumber + ".png 파일을 불러올 수 없습니다!";
+                    System.err.println(errorMsg);
+                    g.setColor(java.awt.Color.RED);
+                    g.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 20));
+                    g.drawString(errorMsg, 50, 100);
+                }
+            }
+// ... (메서드 끝)
         }
     }
 
     // 3. 프로그램 시작점 (main 메서드)
     public static void main(String[] args) {
-        JFrame frame = new JFrame("케이크 만들기"); // 제목 단순화
+        JFrame frame = new JFrame("케이크 만들기");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
 
