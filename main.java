@@ -12,11 +12,11 @@ public class main {
     static class ImagePanel extends JPanel {
 
         // --- [1. 변수 선언] ---
-        private static final int CREAM_WIDTH = 60;
-        private static final int CREAM_HEIGHT = 60;
+        private static final int CREAM_WIDTH = 55;
+        private static final int CREAM_HEIGHT = 55;
         // 과일 크기 (필요시 조절하세요)
-        private static final int FRUIT_WIDTH = 50;
-        private static final int FRUIT_HEIGHT = 50;
+        private static final int FRUIT_WIDTH = 65;
+        private static final int FRUIT_HEIGHT = 65;
 
         // 이미지 변수들
         private Image startImage;
