@@ -25,7 +25,7 @@ class DatabaseUtil {
     private static final String PASSWORD = null;
 
     public static Connection getConnection() throws SQLException {
-        // 드라이버 로드 대신 URL만 사용하여 연결 시도
+// 드라이버 로드 대신 URL만 사용하여 연결 시도
         return DriverManager.getConnection(URL);
     }
 }
@@ -101,11 +101,11 @@ public class main {
             loadImages();
             currentState = "start";
 
-            // 로그인 필드 설정
+// 로그인 필드 설정
             loginIdField = createStyledInputField("아이디");
             loginPwField = createStyledPasswordInput();
 
-            // 회원가입 필드 설정
+// 회원가입 필드 설정
             signupIdField = createStyledInputField("새 아이디");
             signupPwField = createStyledPasswordInput();
 
@@ -114,7 +114,7 @@ public class main {
             this.add(signupIdField);
             this.add(signupPwField);
 
-            // 편지 필드 설정 (기존 코드 유지)
+// 편지 필드 설정 (기존 코드 유지)
             dateField = createStyledTextField(JTextField.RIGHT, "2024. 12. 25");
             toField = createStyledTextField(JTextField.LEFT, "To. ");
             toField.addActionListener(e -> bodyPane.requestFocus());
@@ -148,7 +148,7 @@ public class main {
 
         // --- [3. 마우스 클릭 로직] ---
         private void handleMouseClick(int x, int y) {
-            System.out.println("클릭 좌표: x=" + x + ", y=" + y);
+//          System.out.println("클릭 좌표: x=" + x + ", y=" + y);
 
             if (currentState.equals("start")) {
                 currentState = "login";
@@ -158,14 +158,14 @@ public class main {
                 return;
             }
 
-            // 1-1. 로그인 화면 처리
+// 1-1. 로그인 화면 처리
             else if (currentState.equals("login")) {
-                // [로그인 버튼]
+// [로그인 버튼]
                 if (isClickInArea(x, y, 320, 470, 350, 400)) {
                     performLogin(loginIdField.getText(), new String(loginPwField.getPassword()));
                     return;
                 }
-                // [회원가입 버튼]
+// [회원가입 버튼]
                 else if (isClickInArea(x, y, 320, 470, 410, 460)) {
                     currentState = "signup";
                     toggleAuthFields(false, "login");
@@ -173,7 +173,7 @@ public class main {
                     repaint();
                     return;
                 }
-                // ... (필드 포커스 로직 유지)
+// ... (필드 포커스 로직 유지)
                 else if (isClickInArea(x, y, 150, 400, 240, 290)) {
                     loginIdField.requestFocus();
                 }
@@ -182,14 +182,14 @@ public class main {
                 }
             }
 
-            // 1-2. 회원가입 화면 처리
+// 1-2. 회원가입 화면 처리
             else if (currentState.equals("signup")) {
-                // [회원가입 완료 버튼]
+// [회원가입 완료 버튼]
                 if (isClickInArea(x, y, 320, 470, 350, 400)) {
                     performSignup(signupIdField.getText(), new String(signupPwField.getPassword()));
                     return;
                 }
-                // [로그인으로 돌아가기 버튼]
+// [로그인으로 돌아가기 버튼]
                 else if (isClickInArea(x, y, 320, 470, 410, 460)) {
                     currentState = "login";
                     toggleAuthFields(false, "signup");
@@ -197,7 +197,7 @@ public class main {
                     repaint();
                     return;
                 }
-                // ... (필드 포커스 로직 유지)
+// ... (필드 포커스 로직 유지)
                 else if (isClickInArea(x, y, 150, 400, 240, 290)) {
                     signupIdField.requestFocus();
                 }
@@ -206,7 +206,7 @@ public class main {
                 }
             }
 
-            // 2. 빵 선택 (이하 기존 로직 유지)
+// 2. 빵 선택 (이하 기존 로직 유지)
             else if (currentState.equals("bread_selection")) {
                 if (isClickInArea(x, y, 121, 271, 26, 126)) selectedBreadType = "basic";
                 else if (isClickInArea(x, y, 312, 462, 26, 126)) selectedBreadType = "strawberry";
@@ -221,6 +221,7 @@ public class main {
                     selectedTool = "none";
                     repaint();
                 }
+                repaint(); // 빵 선택 시 바로 반영되도록 repaint 추가 (선택 사항)
             } else if (currentState.equals("cream_selection")) {
                 if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     currentState = "fruit_selection";
@@ -294,7 +295,7 @@ public class main {
                 }
             } else if (currentState.equals("letter_save")) {
                 if (isClickInArea(x, y, 321, 471, 350, 420)) {
-                    // saveCakeImage();
+// saveCakeImage();
                 }
                 else if (isClickInArea(x, y, 40, 180, 460, 520)) {
                     currentState = "letter_write";
@@ -310,7 +311,7 @@ public class main {
             }
         }
 
-        // --- [4. 인증 로직] ---
+// --- [4. 인증 로직] ---
 
         /** 회원가입 로직 */
         private void performSignup(String username, String password) {
@@ -319,7 +320,7 @@ public class main {
                 return;
             }
 
-            // SQLite 구문 사용
+// SQLite 구문 사용
             String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
             try (Connection conn = DatabaseUtil.getConnection();
@@ -333,14 +334,14 @@ public class main {
                 pstmt.executeUpdate();
                 JOptionPane.showMessageDialog(this, "회원가입 성공! 이제 로그인해주세요.", "알림", JOptionPane.INFORMATION_MESSAGE);
 
-                // 성공 후 로그인 화면으로 전환
+// 성공 후 로그인 화면으로 전환
                 currentState = "login";
                 toggleAuthFields(false, "signup");
                 toggleAuthFields(true, "login");
                 repaint();
 
             } catch (SQLException e) {
-                // SQLite에서 UNIQUE 제약 조건 위반(아이디 중복) 처리
+// SQLite에서 UNIQUE 제약 조건 위반(아이디 중복) 처리
                 if (e.getMessage().contains("UNIQUE constraint failed")) {
                     JOptionPane.showMessageDialog(this, "이미 존재하는 아이디입니다.", "오류", JOptionPane.ERROR_MESSAGE);
                 } else {
@@ -371,8 +372,9 @@ public class main {
                     if (storedPassword.equals(password)) {
                         JOptionPane.showMessageDialog(this, username + "님, 로그인 성공!", "환영", JOptionPane.INFORMATION_MESSAGE);
 
-                        // 성공 후 다음 화면으로 전환
+// 성공 후 다음 화면으로 전환 및 기본 빵 설정 (수정된 부분)
                         currentState = "bread_selection";
+                        selectedBreadType = "basic"; // 💡 이 부분을 추가하여 기본 빵을 설정합니다.
                         toggleAuthFields(false, "login");
                         repaint();
                     } else {
@@ -389,7 +391,7 @@ public class main {
         }
 
 
-        // --- [5. 유틸리티 메서드] ---
+// --- [5. 유틸리티 메서드] ---
 
         private JTextField createStyledInputField(String placeholder) {
             JTextField field = new JTextField(placeholder);
@@ -430,7 +432,7 @@ public class main {
         }
 
         private void saveCakeImage() {
-            // (기존 saveCakeImage 로직)
+// (기존 saveCakeImage 로직)
         }
 
         private boolean isInCakeArea(int x, int y) {
@@ -517,14 +519,14 @@ public class main {
 
             toggleInputFields(false); // 편지 필드 숨김
 
-            // 1. 로그인/회원가입 화면
+// 1. 로그인/회원가입 화면
             if (currentState.equals("login")) {
                 if (loginBackgroundImage != null) g.drawImage(loginBackgroundImage, 0, 0, getWidth(), getHeight(), this);
                 else { g.setColor(Color.LIGHT_GRAY); g.fillRect(0, 0, getWidth(), getHeight()); }
                 toggleAuthFields(true, "login");
                 return;
             }
-            // ★ 회원가입 화면 처리 ★
+// ★ 회원가입 화면 처리 ★
             else if (currentState.equals("signup")) {
                 if (signupBackgroundImage != null) g.drawImage(signupBackgroundImage, 0, 0, getWidth(), getHeight(), this);
                 else { g.setColor(Color.PINK); g.fillRect(0, 0, getWidth(), getHeight()); }
@@ -532,21 +534,24 @@ public class main {
                 return;
             }
 
-            // 로그인/회원가입 상태가 아니면 인증 필드 모두 숨김
+// 로그인/회원가입 상태가 아니면 인증 필드 모두 숨김
             toggleAuthFields(false, "login");
             toggleAuthFields(false, "signup");
 
-            // 2. 빵 선택
+// 2. 빵 선택
             if (currentState.equals("bread_selection")) {
                 if (breadSelectionImage != null) g.drawImage(breadSelectionImage, 0, 0, getWidth(), getHeight(), this);
+
                 Image overlayImg = null;
+                // selectedBreadType이 "none"이 아니면 해당 빵을 그립니다.
                 if ("basic".equals(selectedBreadType)) overlayImg = breadBasicImage;
                 else if ("choco".equals(selectedBreadType)) overlayImg = breadChocoImage;
                 else if ("strawberry".equals(selectedBreadType)) overlayImg = breadStrawberryImage;
+
                 drawCenteredImage(g, overlayImg);
                 return;
             }
-            // ... (이하 paintComponent의 나머지 상태 처리 로직은 기존 코드와 동일)
+// ... (이하 paintComponent의 나머지 상태 처리 로직은 기존 코드와 동일)
 
             if (currentState.equals("cream_selection") || currentState.equals("fruit_selection")) {
                 if (currentState.equals("cream_selection")) {
@@ -617,11 +622,11 @@ public class main {
 
     public static void main(String[] args) {
 
-        // ⚠️ 1. SQLite DB 파일 생성 및 users 테이블 초기화 ⚠️
+// ⚠️ 1. SQLite DB 파일 생성 및 users 테이블 초기화 ⚠️
         try (Connection conn = DatabaseUtil.getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // SQLite 테이블 생성 코드: 'AUTOINCREMENT' 문법 오류 수정 완료
+// SQLite 테이블 생성 코드: 'AUTOINCREMENT' 문법 오류 수정 완료
             String sql = "CREATE TABLE IF NOT EXISTS users ("
                     + "id INTEGER PRIMARY KEY,"
                     + "username TEXT NOT NULL UNIQUE,"
@@ -631,11 +636,11 @@ public class main {
             System.out.println("SQLite DB 및 users 테이블 준비 완료.");
 
         } catch (SQLException e) {
-            // 여기서 오류가 난다면 sqlite-jdbc 드라이버가 필요하다는 뜻입니다.
+// 여기서 오류가 난다면 sqlite-jdbc 드라이버가 필요하다는 뜻입니다.
             System.err.println("DB 초기화 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
         }
-        // ----------------------------------------------------
+// ----------------------------------------------------
 
         JFrame frame = new JFrame("나만의 케이크 만들기");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
