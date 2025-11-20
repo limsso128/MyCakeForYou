@@ -14,26 +14,29 @@ public class main {
         // --- [1. 변수 선언] ---
         private static final int CREAM_WIDTH = 60;
         private static final int CREAM_HEIGHT = 60;
-        private static final int FRUIT_WIDTH = 40;
-        private static final int FRUIT_HEIGHT = 40;
+        // 과일 크기 (필요시 조절하세요)
+        private static final int FRUIT_WIDTH = 50;
+        private static final int FRUIT_HEIGHT = 50;
 
         // 이미지 변수들
         private Image startImage;
         private Image breadSelectionImage;
         private Image creamSelectionImage;
+        private Image fruitSelectionImage;
+
         private Image breadBasicImage, breadChocoImage, breadStrawberryImage;
-        // (삭제: breadBasicCreamImage 등 크림 발라진 이미지는 안 씁니다)
 
         private Image letterSelectionImage;
         private Image letterWriteImage;
         private Image[] letterImages = new Image[9];
+
+        // 꾸미기 재료: 크림
         private Image creamChocoImg, creamStrawImg, creamWhiteImg;
+        // 꾸미기 재료: 과일 (요청하신 4종류)
+        private Image fruitBananaImg, fruitGrapeImg, fruitStrawImg, fruitOrangeImg;
 
-        private Image fruitSelectionImage;
-        private Image fruitStrawberryImg, fruitCherryImg, fruitOrangeImg;
-
-        private String selectedBreadType = "none";
         private String currentState;
+        private String selectedBreadType = "none";
         private String selectedTool = "none";
         private int selectedLetterNumber = 0;
         private ArrayList<Placement> decorations = new ArrayList<>();
@@ -97,28 +100,30 @@ public class main {
 
         // --- [3. 마우스 클릭 로직] ---
         private void handleMouseClick(int x, int y) {
+
+            // 좌표 확인용 로그
+            System.out.println("클릭 좌표 -> x: " + x + ", y: " + y);
+
+            // 1. 시작 화면
             if (currentState.equals("start")) {
                 currentState = "bread_selection";
                 selectedBreadType = "none";
                 repaint();
 
+                // 2. 빵 선택
             } else if (currentState.equals("bread_selection")) {
-                // 1. 초코빵
                 if (isClickInArea(x, y, 121, 271, 26, 126)) {
                     selectedBreadType = "choco";
                     repaint();
                 }
-                // 2. 딸기빵
                 else if (isClickInArea(x, y, 312, 462, 26, 126)) {
                     selectedBreadType = "strawberry";
                     repaint();
                 }
-                // 3. 기본빵 (클릭 시 초코로 설정)
                 else if (isClickInArea(x, y, 489, 639, 18, 118)) {
                     selectedBreadType = "choco";
                     repaint();
                 }
-                // 4. [다음] 버튼 -> 크림 선택으로
                 else if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     if (selectedBreadType.equals("none")) {
                         JOptionPane.showMessageDialog(this, "빵을 먼저 선택해주세요!");
@@ -130,49 +135,85 @@ public class main {
                     repaint();
                 }
 
+                // 3. 크림 선택
             } else if (currentState.equals("cream_selection")) {
-                // 다음 버튼 -> 과일 선택
-                if (isClickInArea(x, y, 601, 751, 441, 541)) {
+                if (isClickInArea(x, y, 601, 751, 441, 541)) { // 다음 버튼
                     currentState = "fruit_selection";
                     selectedTool = "none";
                     repaint();
                 }
-                // 도구 선택
+                // 크림 도구 선택
                 else if (isClickInArea(x, y, 119, 269, 39, 139)) selectedTool = "cream_choco";
                 else if (isClickInArea(x, y, 314, 464, 42, 142)) selectedTool = "cream_straw";
                 else if (isClickInArea(x, y, 496, 646, 38, 138)) selectedTool = "cream_white";
-                else {
+
                     // 꾸미기
+                else {
                     Image img = null;
                     if (selectedTool.equals("cream_choco")) img = creamChocoImg;
                     else if (selectedTool.equals("cream_straw")) img = creamStrawImg;
                     else if (selectedTool.equals("cream_white")) img = creamWhiteImg;
+
                     if (img != null) {
                         decorations.add(new Placement(x - (img.getWidth(null)/2), y - (img.getHeight(null)/2), img, "cream"));
                         repaint();
                     }
                 }
 
+                // 4. 과일 선택 (★수정된 부분★)
             } else if (currentState.equals("fruit_selection")) {
+
+                // [다음] 버튼 (좌표는 기존 유지)
                 if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     currentState = "letter_selection";
                     selectedTool = "none";
                     repaint();
                 }
-                else if (isClickInArea(x, y, 119, 269, 39, 139)) selectedTool = "fruit_strawberry";
-                else if (isClickInArea(x, y, 314, 464, 42, 142)) selectedTool = "fruit_cherry";
-                else if (isClickInArea(x, y, 496, 646, 38, 138)) selectedTool = "fruit_orange";
+
+                // ★ 과일 도구 선택 (알려주신 좌표 중심으로 ±35px 정도 범위를 잡음)
+
+                // 1. 바나나 (중심: 203, 88)
+                else if (isClickInArea(x, y, 168, 238, 53, 123)) {
+                    selectedTool = "fruit_banana";
+                    System.out.println("도구 선택: 바나나");
+                }
+                // 2. 포도 (중심: 328, 85)
+                else if (isClickInArea(x, y, 293, 363, 50, 120)) {
+                    selectedTool = "fruit_grape";
+                    System.out.println("도구 선택: 포도");
+                }
+                // 3. 딸기 (중심: 448, 92)
+                else if (isClickInArea(x, y, 413, 483, 57, 127)) {
+                    selectedTool = "fruit_strawberry";
+                    System.out.println("도구 선택: 딸기");
+                }
+                // 4. 오렌지 (중심: 582, 86)
+                else if (isClickInArea(x, y, 547, 617, 51, 121)) {
+                    selectedTool = "fruit_orange";
+                    System.out.println("도구 선택: 오렌지");
+                }
+
+                // ★ 케이크 위에 과일 올리기
                 else {
                     Image img = null;
-                    if (selectedTool.equals("fruit_strawberry")) img = fruitStrawberryImg;
-                    else if (selectedTool.equals("fruit_cherry")) img = fruitCherryImg;
+                    if (selectedTool.equals("fruit_banana")) img = fruitBananaImg;
+                    else if (selectedTool.equals("fruit_grape")) img = fruitGrapeImg;
+                    else if (selectedTool.equals("fruit_strawberry")) img = fruitStrawImg;
                     else if (selectedTool.equals("fruit_orange")) img = fruitOrangeImg;
+
                     if (img != null) {
-                        decorations.add(new Placement(x - (img.getWidth(null)/2), y - (img.getHeight(null)/2), img, "fruit"));
+                        // 클릭 위치에 이미지 추가
+                        decorations.add(new Placement(
+                                x - (img.getWidth(null)/2),
+                                y - (img.getHeight(null)/2),
+                                img,
+                                "fruit"
+                        ));
                         repaint();
                     }
                 }
 
+                // 5. 편지지 선택
             } else if (currentState.equals("letter_selection")) {
                 int clickedLetter = 0;
                 if (isClickInArea(x, y, 142, 242, 60, 160)) clickedLetter = 1;
@@ -193,25 +234,27 @@ public class main {
                     repaint();
                 }
 
+                // 6. 편지 쓰기
             } else if (currentState.equals("letter_write")) {
                 if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     finalCakeAndLetterImage = createLetterOnlyImage();
                     saveImageToFile(finalCakeAndLetterImage);
-
                     currentState = "final_cake";
                     toggleInputFields(false);
                     repaint();
                 }
-            }
-            else if (currentState.equals("final_cake")) {
+
+                // 7. 완료
+            } else if (currentState.equals("final_cake")) {
                 currentState = "start";
                 finalCakeAndLetterImage = null;
                 selectedBreadType = "none";
+                decorations.clear();
                 repaint();
             }
         }
 
-        // --- [4. 이미지 기능] ---
+        // --- [4. 유틸리티 메서드] ---
         private void saveImageToFile(BufferedImage image) {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("편지 저장");
@@ -246,7 +289,10 @@ public class main {
             try {
                 java.net.URL url = getClass().getResource(fileName);
                 return (url != null) ? new ImageIcon(url).getImage() : null;
-            } catch (Exception e) { return null; }
+            } catch (Exception e) {
+                System.out.println("이미지 로드 실패: " + fileName);
+                return null;
+            }
         }
 
         private Image loadImage(String fileName, int w, int h) {
@@ -276,12 +322,11 @@ public class main {
                 startImage = loadImage("background_start.jpg");
                 breadSelectionImage = loadImage("bread_selection.png");
                 creamSelectionImage = loadImage("cream_selection.png");
+                fruitSelectionImage = loadImage("fruit_selection.png");
 
                 breadBasicImage = loadImage("Bread_Basic.png");
                 breadChocoImage = loadImage("Bread_Choco.png");
                 breadStrawberryImage = loadImage("Bread_Strawberry.png");
-
-                // (크림 묻은 빵 이미지는 로드하지 않거나 사용하지 않음)
 
                 letterSelectionImage = loadImage("letter_selection.png");
                 letterWriteImage = loadImage("letter_write.png");
@@ -291,67 +336,54 @@ public class main {
                 creamStrawImg = loadImage("Cream_Strawberry.png", CREAM_WIDTH, CREAM_HEIGHT);
                 creamWhiteImg = loadImage("Cream_White.png", CREAM_WIDTH, CREAM_HEIGHT);
 
-                fruitSelectionImage = loadImage("fruit_selection.png");
-                fruitStrawberryImg = loadImage("Fruit_Strawberry.png", FRUIT_WIDTH, FRUIT_HEIGHT);
-                fruitCherryImg = loadImage("Fruit_Cherry.png", FRUIT_WIDTH, FRUIT_HEIGHT);
-                fruitOrangeImg = loadImage("Fruit_Orange.png", FRUIT_WIDTH, FRUIT_HEIGHT);
+                // ★ 과일 이미지 로드 (파일명 변경됨)
+                fruitBananaImg = loadImage("fruit_banana.png", FRUIT_WIDTH, FRUIT_HEIGHT);
+                fruitGrapeImg = loadImage("fruit_grapes.png", FRUIT_WIDTH, FRUIT_HEIGHT);
+                fruitStrawImg = loadImage("fruit_strawberry.png", FRUIT_WIDTH, FRUIT_HEIGHT);
+                fruitOrangeImg = loadImage("fruit_orange.png", FRUIT_WIDTH, FRUIT_HEIGHT);
+
             } catch (Exception e) { e.printStackTrace(); }
         }
 
-        // --- [5. 화면 그리기 (Paint)] ---
+        // --- [5. 화면 그리기] ---
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            // 1. 빵 선택 화면
+            // 1. 빵 선택
             if (currentState.equals("bread_selection")) {
-                // (1) 배경 그리기
-                if (breadSelectionImage != null) {
-                    g.drawImage(breadSelectionImage, 0, 0, getWidth(), getHeight(), this);
-                }
-
-                // (2) 빵 그리기 (다른 거 절대 안 그림)
+                if (breadSelectionImage != null) g.drawImage(breadSelectionImage, 0, 0, getWidth(), getHeight(), this);
                 Image overlayImg = null;
                 if ("basic".equals(selectedBreadType)) overlayImg = breadBasicImage;
                 else if ("choco".equals(selectedBreadType)) overlayImg = breadChocoImage;
                 else if ("strawberry".equals(selectedBreadType)) overlayImg = breadStrawberryImage;
-
                 drawCenteredImage(g, overlayImg);
-
-                // (3) 입력창 확실히 끄기 (혹시 몰라서)
                 toggleInputFields(false);
                 return;
             }
 
-            // 2. 크림 / 과일 선택 화면
+            // 2. 크림 & 과일 선택
             if (currentState.equals("cream_selection") || currentState.equals("fruit_selection")) {
-
-                // (1) 배경 그리기
                 if (currentState.equals("cream_selection")) {
                     if (creamSelectionImage != null) g.drawImage(creamSelectionImage, 0, 0, getWidth(), getHeight(), this);
                 } else {
                     if (fruitSelectionImage != null) g.drawImage(fruitSelectionImage, 0, 0, getWidth(), getHeight(), this);
                 }
 
-                // (2) 빵 그리기: ★원본 빵(Bread_XX.png)만 사용★ (다른 이미지 삭제됨)
                 Image breadBase = null;
                 if ("basic".equals(selectedBreadType)) breadBase = breadBasicImage;
                 else if ("choco".equals(selectedBreadType)) breadBase = breadChocoImage;
                 else if ("strawberry".equals(selectedBreadType)) breadBase = breadStrawberryImage;
-
-                // 빵 선택 화면과 완벽히 동일한 함수 호출
                 drawCenteredImage(g, breadBase);
 
-                // (3) 꾸미기(크림/과일) 그리기
                 for (Placement p : decorations) {
                     g.drawImage(p.image, p.x, p.y, this);
                 }
-
                 toggleInputFields(false);
                 return;
             }
 
-            // 3. 나머지 화면들
+            // 3. 나머지
             Image bg = null;
             if (currentState.equals("start")) bg = startImage;
             else if (currentState.equals("letter_selection")) bg = letterSelectionImage;
@@ -359,7 +391,7 @@ public class main {
 
             if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
 
-            // 4. 편지 쓰기 UI
+            // 4. 편지 UI
             if (currentState.equals("letter_write") && selectedLetterNumber != 0) {
                 Image selectedLetterImage = letterImages[selectedLetterNumber - 1];
                 if (selectedLetterImage != null) {
@@ -367,6 +399,7 @@ public class main {
                     int lx = (getWidth() - targetWidth) / 2;
                     int ly = (getHeight() - targetHeight) / 2;
                     g.drawImage(selectedLetterImage, lx, ly, targetWidth, targetHeight, this);
+
                     dateField.setBounds(lx + targetWidth - 160, ly + 18, 140, 25);
                     toField.setBounds(lx + 25, ly + 45, 200, 30);
                     bodyPane.setBounds(lx + 25, ly + 85, targetWidth - 50, targetHeight - 130);
@@ -377,27 +410,19 @@ public class main {
             }
         }
 
-        // ⭐ [사용자 지정 값 적용] 520 x 370, y+90
         private void drawCenteredImage(Graphics g, Image img) {
             if (img != null) {
                 int imgW = img.getWidth(this);
                 int imgH = img.getHeight(this);
-
                 if (imgW > 0 && imgH > 0) {
-                    // 요청하신 크기와 위치 적용
-                    int maxW = 520;
-                    int maxH = 370;
-
+                    int maxW = 520; int maxH = 370;
                     double widthRatio = (double) maxW / imgW;
                     double heightRatio = (double) maxH / imgH;
                     double scale = Math.min(widthRatio, heightRatio);
-
                     int finalW = (int) (imgW * scale);
                     int finalH = (int) (imgH * scale);
-
                     int x = (getWidth() - finalW) / 2;
-                    int y = (getHeight() - finalH) / 2 + 90; // +90 이동
-
+                    int y = (getHeight() - finalH) / 2 + 90;
                     g.drawImage(img, x, y, finalW, finalH, this);
                 }
             }
