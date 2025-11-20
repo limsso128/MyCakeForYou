@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -206,11 +207,15 @@ public class main {
                 }
             }
 
-// 2. 빵 선택 (이하 기존 로직 유지)
+// 2. 빵 선택 (초코, 딸기, 초코 순서는 유지)
             else if (currentState.equals("bread_selection")) {
-                if (isClickInArea(x, y, 121, 271, 26, 126)) selectedBreadType = "basic";
+                // 초코
+                if (isClickInArea(x, y, 121, 271, 26, 126)) selectedBreadType = "choco";
+                    // 딸기
                 else if (isClickInArea(x, y, 312, 462, 26, 126)) selectedBreadType = "strawberry";
+                    // 초코
                 else if (isClickInArea(x, y, 489, 639, 18, 118)) selectedBreadType = "choco";
+
                 else if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     if (selectedBreadType.equals("none")) {
                         JOptionPane.showMessageDialog(this, "빵을 먼저 선택해주세요!");
@@ -221,7 +226,7 @@ public class main {
                     selectedTool = "none";
                     repaint();
                 }
-                repaint(); // 빵 선택 시 바로 반영되도록 repaint 추가 (선택 사항)
+                repaint();
             } else if (currentState.equals("cream_selection")) {
                 if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     currentState = "fruit_selection";
@@ -372,9 +377,9 @@ public class main {
                     if (storedPassword.equals(password)) {
                         JOptionPane.showMessageDialog(this, username + "님, 로그인 성공!", "환영", JOptionPane.INFORMATION_MESSAGE);
 
-// 성공 후 다음 화면으로 전환 및 기본 빵 설정 (수정된 부분)
+// 성공 후 다음 화면으로 전환 및 기본 빵 설정
                         currentState = "bread_selection";
-                        selectedBreadType = "basic"; // 💡 이 부분을 추가하여 기본 빵을 설정합니다.
+                        selectedBreadType = "basic"; // 💡 "basic"으로 초기 빵 설정 복구
                         toggleAuthFields(false, "login");
                         repaint();
                     } else {
@@ -398,6 +403,11 @@ public class main {
             field.setFont(FIELD_FONT);
             field.setHorizontalAlignment(JTextField.LEFT);
             field.setVisible(false);
+
+            // 💡 투명 설정 및 밑줄 제거 (기본값 복구)
+            // field.setOpaque(false); 제거
+            // field.setBorder(...) 제거
+
             return field;
         }
 
@@ -406,6 +416,11 @@ public class main {
             field.setFont(FIELD_FONT);
             field.setHorizontalAlignment(JPasswordField.LEFT);
             field.setVisible(false);
+
+            // 💡 투명 설정 및 밑줄 제거 (기본값 복구)
+            // field.setOpaque(false); 제거
+            // field.setBorder(...) 제거
+
             return field;
         }
 
@@ -455,6 +470,7 @@ public class main {
                 e.printStackTrace();
                 return null;
             }
+            // ... (나머지 loadImage 메서드들은 동일)
         }
 
         private Image loadImage(String fileName, int w, int h) {
@@ -543,7 +559,7 @@ public class main {
                 if (breadSelectionImage != null) g.drawImage(breadSelectionImage, 0, 0, getWidth(), getHeight(), this);
 
                 Image overlayImg = null;
-                // selectedBreadType이 "none"이 아니면 해당 빵을 그립니다.
+                // selectedBreadType 값에 따라 이미지를 그립니다.
                 if ("basic".equals(selectedBreadType)) overlayImg = breadBasicImage;
                 else if ("choco".equals(selectedBreadType)) overlayImg = breadChocoImage;
                 else if ("strawberry".equals(selectedBreadType)) overlayImg = breadStrawberryImage;
