@@ -12,11 +12,12 @@ public class main {
     static class ImagePanel extends JPanel {
 
         // --- [1. 변수 선언] ---
-        private static final int CREAM_WIDTH = 55;
-        private static final int CREAM_HEIGHT = 55;
-        // 과일 크기 (필요시 조절하세요)
-        private static final int FRUIT_WIDTH = 65;
-        private static final int FRUIT_HEIGHT = 65;
+        private static final int CREAM_WIDTH = 60;
+        private static final int CREAM_HEIGHT = 60;
+
+        // 과일 크기 설정
+        private static final int FRUIT_WIDTH = 50;
+        private static final int FRUIT_HEIGHT = 50;
 
         // 이미지 변수들
         private Image startImage;
@@ -30,9 +31,7 @@ public class main {
         private Image letterWriteImage;
         private Image[] letterImages = new Image[9];
 
-        // 꾸미기 재료: 크림
         private Image creamChocoImg, creamStrawImg, creamWhiteImg;
-        // 꾸미기 재료: 과일 (요청하신 4종류)
         private Image fruitBananaImg, fruitGrapeImg, fruitStrawImg, fruitOrangeImg;
 
         private String currentState;
@@ -40,6 +39,9 @@ public class main {
         private String selectedTool = "none";
         private int selectedLetterNumber = 0;
         private ArrayList<Placement> decorations = new ArrayList<>();
+
+        // ★ 케이크가 그려진 위치와 크기를 저장할 변수 (영역 제한용) ★
+        private int cakeX = 0, cakeY = 0, cakeWidth = 0, cakeHeight = 0;
 
         private JTextField dateField;
         private JTextField toField;
@@ -101,8 +103,7 @@ public class main {
         // --- [3. 마우스 클릭 로직] ---
         private void handleMouseClick(int x, int y) {
 
-            // 좌표 확인용 로그
-            System.out.println("클릭 좌표 -> x: " + x + ", y: " + y);
+            // (좌표 출력 코드 삭제됨)
 
             // 1. 시작 화면
             if (currentState.equals("start")) {
@@ -137,79 +138,62 @@ public class main {
 
                 // 3. 크림 선택
             } else if (currentState.equals("cream_selection")) {
-                if (isClickInArea(x, y, 601, 751, 441, 541)) { // 다음 버튼
+                // [다음] 버튼
+                if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     currentState = "fruit_selection";
                     selectedTool = "none";
                     repaint();
                 }
-                // 크림 도구 선택
+                // 도구 선택 버튼
                 else if (isClickInArea(x, y, 119, 269, 39, 139)) selectedTool = "cream_choco";
                 else if (isClickInArea(x, y, 314, 464, 42, 142)) selectedTool = "cream_straw";
                 else if (isClickInArea(x, y, 496, 646, 38, 138)) selectedTool = "cream_white";
 
-                    // 꾸미기
+                    // ★ 꾸미기 (케이크 영역 내부인지 확인) ★
                 else {
-                    Image img = null;
-                    if (selectedTool.equals("cream_choco")) img = creamChocoImg;
-                    else if (selectedTool.equals("cream_straw")) img = creamStrawImg;
-                    else if (selectedTool.equals("cream_white")) img = creamWhiteImg;
+                    // 케이크 영역(Rect) 안에 클릭이 들어왔는지 체크
+                    if (isInCakeArea(x, y)) {
+                        Image img = null;
+                        if (selectedTool.equals("cream_choco")) img = creamChocoImg;
+                        else if (selectedTool.equals("cream_straw")) img = creamStrawImg;
+                        else if (selectedTool.equals("cream_white")) img = creamWhiteImg;
 
-                    if (img != null) {
-                        decorations.add(new Placement(x - (img.getWidth(null)/2), y - (img.getHeight(null)/2), img, "cream"));
-                        repaint();
+                        if (img != null) {
+                            decorations.add(new Placement(x - (img.getWidth(null)/2), y - (img.getHeight(null)/2), img, "cream"));
+                            repaint();
+                        }
                     }
                 }
 
-                // 4. 과일 선택 (★수정된 부분★)
+                // 4. 과일 선택
             } else if (currentState.equals("fruit_selection")) {
 
-                // [다음] 버튼 (좌표는 기존 유지)
+                // [다음] 버튼
                 if (isClickInArea(x, y, 601, 751, 441, 541)) {
                     currentState = "letter_selection";
                     selectedTool = "none";
                     repaint();
                 }
 
-                // ★ 과일 도구 선택 (알려주신 좌표 중심으로 ±35px 정도 범위를 잡음)
+                // 과일 도구 선택
+                else if (isClickInArea(x, y, 168, 238, 53, 123)) selectedTool = "fruit_banana";
+                else if (isClickInArea(x, y, 293, 363, 50, 120)) selectedTool = "fruit_grape";
+                else if (isClickInArea(x, y, 413, 483, 57, 127)) selectedTool = "fruit_strawberry";
+                else if (isClickInArea(x, y, 547, 617, 51, 121)) selectedTool = "fruit_orange";
 
-                // 1. 바나나 (중심: 203, 88)
-                else if (isClickInArea(x, y, 168, 238, 53, 123)) {
-                    selectedTool = "fruit_banana";
-                    System.out.println("도구 선택: 바나나");
-                }
-                // 2. 포도 (중심: 328, 85)
-                else if (isClickInArea(x, y, 293, 363, 50, 120)) {
-                    selectedTool = "fruit_grape";
-                    System.out.println("도구 선택: 포도");
-                }
-                // 3. 딸기 (중심: 448, 92)
-                else if (isClickInArea(x, y, 413, 483, 57, 127)) {
-                    selectedTool = "fruit_strawberry";
-                    System.out.println("도구 선택: 딸기");
-                }
-                // 4. 오렌지 (중심: 582, 86)
-                else if (isClickInArea(x, y, 547, 617, 51, 121)) {
-                    selectedTool = "fruit_orange";
-                    System.out.println("도구 선택: 오렌지");
-                }
-
-                // ★ 케이크 위에 과일 올리기
+                    // ★ 과일 배치 (케이크 영역 내부인지 확인) ★
                 else {
-                    Image img = null;
-                    if (selectedTool.equals("fruit_banana")) img = fruitBananaImg;
-                    else if (selectedTool.equals("fruit_grape")) img = fruitGrapeImg;
-                    else if (selectedTool.equals("fruit_strawberry")) img = fruitStrawImg;
-                    else if (selectedTool.equals("fruit_orange")) img = fruitOrangeImg;
+                    if (isInCakeArea(x, y)) {
+                        Image img = null;
+                        if (selectedTool.equals("fruit_banana")) img = fruitBananaImg;
+                        else if (selectedTool.equals("fruit_grape")) img = fruitGrapeImg;
+                        else if (selectedTool.equals("fruit_strawberry")) img = fruitStrawImg;
+                        else if (selectedTool.equals("fruit_orange")) img = fruitOrangeImg;
 
-                    if (img != null) {
-                        // 클릭 위치에 이미지 추가
-                        decorations.add(new Placement(
-                                x - (img.getWidth(null)/2),
-                                y - (img.getHeight(null)/2),
-                                img,
-                                "fruit"
-                        ));
-                        repaint();
+                        if (img != null) {
+                            decorations.add(new Placement(x - (img.getWidth(null)/2), y - (img.getHeight(null)/2), img, "fruit"));
+                            repaint();
+                        }
                     }
                 }
 
@@ -255,6 +239,15 @@ public class main {
         }
 
         // --- [4. 유틸리티 메서드] ---
+
+        // ★ 케이크 영역 판별 함수 ★
+        private boolean isInCakeArea(int x, int y) {
+            // 케이크가 아직 그려지지 않았거나(크기 0) 선택되지 않았으면 false
+            if (cakeWidth == 0 || cakeHeight == 0) return false;
+            return (x >= cakeX && x <= cakeX + cakeWidth) &&
+                    (y >= cakeY && y <= cakeY + cakeHeight);
+        }
+
         private void saveImageToFile(BufferedImage image) {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("편지 저장");
@@ -289,10 +282,7 @@ public class main {
             try {
                 java.net.URL url = getClass().getResource(fileName);
                 return (url != null) ? new ImageIcon(url).getImage() : null;
-            } catch (Exception e) {
-                System.out.println("이미지 로드 실패: " + fileName);
-                return null;
-            }
+            } catch (Exception e) { return null; }
         }
 
         private Image loadImage(String fileName, int w, int h) {
@@ -336,7 +326,6 @@ public class main {
                 creamStrawImg = loadImage("Cream_Strawberry.png", CREAM_WIDTH, CREAM_HEIGHT);
                 creamWhiteImg = loadImage("Cream_White.png", CREAM_WIDTH, CREAM_HEIGHT);
 
-                // ★ 과일 이미지 로드 (파일명 변경됨)
                 fruitBananaImg = loadImage("fruit_banana.png", FRUIT_WIDTH, FRUIT_HEIGHT);
                 fruitGrapeImg = loadImage("fruit_grapes.png", FRUIT_WIDTH, FRUIT_HEIGHT);
                 fruitStrawImg = loadImage("fruit_strawberry.png", FRUIT_WIDTH, FRUIT_HEIGHT);
@@ -423,6 +412,13 @@ public class main {
                     int finalH = (int) (imgH * scale);
                     int x = (getWidth() - finalW) / 2;
                     int y = (getHeight() - finalH) / 2 + 90;
+
+                    // ★ 케이크의 현재 위치와 크기를 변수에 업데이트 (클릭 판정용) ★
+                    this.cakeX = x;
+                    this.cakeY = y;
+                    this.cakeWidth = finalW;
+                    this.cakeHeight = finalH;
+
                     g.drawImage(img, x, y, finalW, finalH, this);
                 }
             }
