@@ -377,9 +377,9 @@ public class main {
                     if (storedPassword.equals(password)) {
                         JOptionPane.showMessageDialog(this, username + "님, 로그인 성공!", "환영", JOptionPane.INFORMATION_MESSAGE);
 
-// 성공 후 다음 화면으로 전환 및 기본 빵 설정
+// 성공 후 다음 화면으로 전환 및 빵 타입 초기화 (수정됨)
                         currentState = "bread_selection";
-                        selectedBreadType = "basic"; // 💡 "basic"으로 초기 빵 설정 복구
+                        selectedBreadType = "none"; // 💡 "none"으로 설정하여 초기에는 케이크를 그리지 않음
                         toggleAuthFields(false, "login");
                         repaint();
                     } else {
@@ -404,10 +404,6 @@ public class main {
             field.setHorizontalAlignment(JTextField.LEFT);
             field.setVisible(false);
 
-            // 💡 투명 설정 및 밑줄 제거 (기본값 복구)
-            // field.setOpaque(false); 제거
-            // field.setBorder(...) 제거
-
             return field;
         }
 
@@ -416,10 +412,6 @@ public class main {
             field.setFont(FIELD_FONT);
             field.setHorizontalAlignment(JPasswordField.LEFT);
             field.setVisible(false);
-
-            // 💡 투명 설정 및 밑줄 제거 (기본값 복구)
-            // field.setOpaque(false); 제거
-            // field.setBorder(...) 제거
 
             return field;
         }
@@ -559,12 +551,15 @@ public class main {
                 if (breadSelectionImage != null) g.drawImage(breadSelectionImage, 0, 0, getWidth(), getHeight(), this);
 
                 Image overlayImg = null;
-                // selectedBreadType 값에 따라 이미지를 그립니다.
+                // selectedBreadType이 "none"이 아니면 해당 빵을 그립니다.
                 if ("basic".equals(selectedBreadType)) overlayImg = breadBasicImage;
                 else if ("choco".equals(selectedBreadType)) overlayImg = breadChocoImage;
                 else if ("strawberry".equals(selectedBreadType)) overlayImg = breadStrawberryImage;
 
-                drawCenteredImage(g, overlayImg);
+                // 💡 수정된 로직: selectedBreadType이 "none"이 아닐 때만 케이크를 그립니다.
+                if (!selectedBreadType.equals("none")) {
+                    drawCenteredImage(g, overlayImg);
+                }
                 return;
             }
 // ... (이하 paintComponent의 나머지 상태 처리 로직은 기존 코드와 동일)
